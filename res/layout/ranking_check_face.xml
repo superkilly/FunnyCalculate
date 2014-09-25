@@ -1,0 +1,66 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <Button
+        android:id="@+id/startGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="45dp"
+        android:width="180dp"
+        android:onClick="startGameFun"
+        android:text="@string/startGameBtn" />
+	<Button
+        android:id="@+id/typeSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="105dp"
+        android:width="180dp"
+        android:onClick="typeSettingFun"
+        android:text="@string/typeSettingBtn" />
+	<Button
+        android:id="@+id/languageSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="165dp"
+        android:width="180dp"
+        android:onClick="languageSettingFun"
+        android:text="@string/languageSettingBtn" />
+	<Button
+        android:id="@+id/judgeNeighbor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="225dp"
+        android:width="180dp"
+        android:onClick="judgeNeighborFun"
+        android:text="@string/judgeNeighborBtn" />
+	<Button
+        android:id="@+id/rankingCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="285dp"
+        android:width="180dp"
+        android:onClick="rankingCheckFun"
+        android:text="@string/rankingCheckBtn" />
+	<Button
+        android:id="@+id/contactUs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="345dp"
+        android:width="180dp"
+        android:onClick="contactUsFun"
+        android:text="@string/contactUsBtn" />
+</RelativeLayout>
