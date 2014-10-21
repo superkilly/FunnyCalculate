@@ -1,0 +1,85 @@
+#
+# An unexpected error has been detected by Java Runtime Environment:
+#
+#  Internal Error (classFileParser.cpp:2923), pid=8824, tid=7864
+#  Error: ShouldNotReachHere()
+#
+# Java VM: Java HotSpot(TM) Client VM (11.0-b15 mixed mode windows-x86)
+# If you would like to submit a bug report, please visit:
+#   http://java.sun.com/webapps/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x02521400):  JavaThread "Unknown thread" [_thread_in_vm, id=7864, stack(0x002e0000,0x00330000)]
+
+Stack: [0x002e0000,0x00330000]
+[error occurred during error reporting (printing stack bounds), id 0xc0000005]
+
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+
+Other Threads:
+
+=>0x02521400 (exited) JavaThread "Unknown thread" [_thread_in_vm, id=7864, stack(0x002e0000,0x00330000)]
+
+VM state:not at safepoint (not fully initialized)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Dynamic libraries:
+0x00400000 - 0x00424000 	D:\Program Files\Java\jre6\bin\javaw.exe
+0x77050000 - 0x771d0000 	C:\Windows\SysWOW64\ntdll.dll
+0x74a80000 - 0x74b90000 	C:\Windows\syswow64\kernel32.dll
+0x75880000 - 0x758c7000 	C:\Windows\syswow64\KERNELBASE.dll
+0x755d0000 - 0x75670000 	C:\Windows\syswow64\ADVAPI32.dll
+0x75300000 - 0x753ac000 	C:\Windows\syswow64\msvcrt.dll
+0x74790000 - 0x747a9000 	C:\Windows\SysWOW64\sechost.dll
+0x751b0000 - 0x752a0000 	C:\Windows\syswow64\RPCRT4.dll
+0x74720000 - 0x74780000 	C:\Windows\syswow64\SspiCli.dll
+0x74710000 - 0x7471c000 	C:\Windows\syswow64\CRYPTBASE.dll
+0x748d0000 - 0x749d0000 	C:\Windows\syswow64\USER32.dll
+0x76730000 - 0x767c0000 	C:\Windows\syswow64\GDI32.dll
+0x74a70000 - 0x74a7a000 	C:\Windows\syswow64\LPK.dll
+0x749d0000 - 0x74a6d000 	C:\Windows\syswow64\USP10.dll
+0x750d0000 - 0x75130000 	C:\Windows\system32\IMM32.DLL
+0x753b0000 - 0x7547c000 	C:\Windows\syswow64\MSCTF.dll
+0x7c340000 - 0x7c396000 	D:\Program Files\Java\jre6\bin\msvcr71.dll
+0x6d800000 - 0x6da56000 	D:\Program Files\Java\jre6\bin\client\jvm.dll
+0x74bb0000 - 0x74be2000 	C:\Windows\syswow64\WINMM.dll
+0x711b0000 - 0x711fb000 	C:\Windows\system32\apphelp.dll
+0x6d280000 - 0x6d288000 	D:\Program Files\Java\jre6\bin\hpi.dll
+0x77020000 - 0x77025000 	C:\Windows\syswow64\PSAPI.DLL
+0x6d7b0000 - 0x6d7bc000 	D:\Program Files\Java\jre6\bin\verify.dll
+0x6d320000 - 0x6d33f000 	D:\Program Files\Java\jre6\bin\java.dll
+0x6d7f0000 - 0x6d7ff000 	D:\Program Files\Java\jre6\bin\zip.dll
+
+VM Arguments:
+jvm_args: -Dfile.encoding=GBK -Xbootclasspath:D:\softwares\android\android-sdk-windows\platforms\android-16\android.jar 
+java_command: com.killy.calculate.StartGameFace
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+JAVA_HOME=D:\Program Files\Java\jdk1.6.0_10
+PATH=D:/Program Files/Java/jre6/bin/client;D:/Program Files/Java/jre6/bin;D:/Program Files/Java/jre6/lib/i386;C:\Program Files (x86)\AMD APP\bin\x86_64;C:\Program Files (x86)\AMD APP\bin\x86;F:\oracle\product\10.2.0\client_1\bin;F:\oracle\product\10.2.0\db_1\bin;D:\Program Files\Java\jre6\bin;D:\Program Files\Java\jdk1.6.0_10\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;D:\softwares\windowsœ¬÷¥––linux√¸¡Ó»Ìº˛\bin;C:\Python33;C:\Program Files\ThinkPad\Bluetooth Software\;C:\Program Files\ThinkPad\Bluetooth Software\syswow64;C:\Program Files (x86)\ATI Technologies\ATI.ACE\Core-Static;D:\softwares\eclipse-jee-indigo-SR2-win32_32bit_back_android;
+USERNAME=superkilly
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 23 Stepping 10, GenuineIntel
+
+
+
+---------------  S Y S T E M  ---------------
+
+OS: Windows NT 6.1 Build 7600 
+
+CPU:total 2 (2 cores per cpu, 1 threads per core) family 6 model 7 stepping 10, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3
+
+Memory: 4k page, physical 4122636k(958448k free), swap 4194303k(3819376k free)
+
+vm_info: Java HotSpot(TM) Client VM (11.0-b15) for windows-x86 JRE (1.6.0_10-rc2-b32), built on Sep 12 2008 00:52:11 by "java_re" with MS VC++ 7.1
+
+time: Tue Oct 21 20:34:25 2014
+elapsed time: 0 seconds
+
