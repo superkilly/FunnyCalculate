@@ -119,6 +119,11 @@ public class StartGameFace extends Activity
     private static TextView totalCnt = null;
     
     /**
+     * 提示信息 
+     */
+    private static TextView tip = null;
+    
+    /**
      * 产生随机数对象
      */
     private static final Random random = new Random();
@@ -193,13 +198,21 @@ public class StartGameFace extends Activity
         totalCntParams.leftMargin = 160 + 10; // 横坐标定位
         relativeLayout.addView(totalCnt, totalCntParams);
 
+        tip = new TextView(this);
+        tip.setText("请移动按钮");
+        RelativeLayout.LayoutParams tipParams = new RelativeLayout.LayoutParams(
+                260, 30); // 设置按钮的宽度和高度
+        tipParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 4 + 30; // 纵坐标定位
+        tipParams.leftMargin = 0; // 横坐标定位
+        relativeLayout.addView(tip, tipParams);
+        
         setContentView(relativeLayout);
     }
 
     private void addNumBtn(int i, int j, Random random) {
         numBtnArr[i][j] = new Button(this);
         // 按钮的ID是通过10*横序号+纵序号(考虑到一横最多不会超过10个按钮,一纵也不会超过10个)
-        numBtnArr[i][j].setId(getNumId(j, i));
+        numBtnArr[i][j].setId(getNumId(i, j));
         numBtnArr[i][j].setText("" + Math.abs(random.nextInt(i * splitHeight + j + 1)));
         addMoveLister(numBtnArr[i][j]);
 
@@ -213,15 +226,15 @@ public class StartGameFace extends Activity
 
         RelativeLayout.LayoutParams btParams = new RelativeLayout.LayoutParams(btnWidth, btnHeight); // 设置按钮的宽度和高度
         // i表示的是第i行 k表示的是第k列
-        btParams.topMargin = btnHeight * i; // 纵坐标定位
-        btParams.leftMargin = btnWidth * j; // 横坐标定位
+        btParams.leftMargin = btnHeight * j; // 横坐标定位[距离屏幕最左上方往右]
+        btParams.topMargin = btnWidth * i; // 纵坐标定位[距离屏幕最左上方往下]
         relativeLayout.addView(numBtnArr[i][j], btParams);
     }
     
     private void addCalBtn(int i, int j, Random random) {
         calBtnArr[i][j] = new Button(this);
         // 按钮的ID是通过2000+10*横序号+纵序号(考虑到一横最多不会超过10个按钮,一纵也不会超过10个)
-        calBtnArr[i][j].setId(getCalId(j, i));
+        calBtnArr[i][j].setId(getCalId(i, j));
         calBtnArr[i][j].setText(calArr[random.nextInt(calArr.length)]);
         addMoveLister(calBtnArr[i][j]);
 
@@ -234,8 +247,8 @@ public class StartGameFace extends Activity
         RelativeLayout.LayoutParams btParams = new RelativeLayout.LayoutParams(
                 btnWidth, btnHeight); // 设置按钮的宽度和高度
         // i表示的是第i行 k表示的是第k列
-        btParams.topMargin = btnHeight * (i + numHeiNum) + splitHeight; // 纵坐标定位
-        btParams.leftMargin = btnWidth * j; // 横坐标定位
+        btParams.leftMargin = btnHeight * j; // 纵坐标定位
+        btParams.topMargin = btnWidth * (i + numHeiNum) + splitHeight; // 横坐标定位
         relativeLayout.addView(calBtnArr[i][j], btParams);
     }
     
@@ -264,8 +277,8 @@ public class StartGameFace extends Activity
                 switch (ea)
                 {
                 case MotionEvent.ACTION_DOWN:
+                    System.out.println(v.getId());
                     // 获取触摸事件触摸位置的原始X坐标
-                    System.out.println(v.getLeft() + "[:]" + v.getTop());
                     btnLeft = v.getLeft();
                     btnTop = v.getTop();
                     lastX = (int) event.getRawX();
@@ -313,14 +326,111 @@ public class StartGameFace extends Activity
                         numCalActionUp(v, event, lastX, lastY, screenWidth, screenHeight);
                     } else if (isInExpressArea(btnLeft, btnTop)){
                         // 按钮原来的位置在目的运算表达式区
-                        System.out.println("cal");
                         expressActionUp(v, event, lastX, lastY, screenWidth, screenHeight, btnLeft, btnTop);
                     }
+                    validate();
                     break;
                 }
                 return false;
             }
         });
+    }
+    
+    /**
+     * 验证运算表达式正确性
+     * @Exception 异常对象
+     * @return void
+     */
+    private void validate() {
+        System.out.println("num-----------------");
+        for (int i = 0; i < numHeiNum; i++)
+        {
+            for (int j = 0; j < widNum; j++)
+            {
+                if (null == numBtnArr[i][j]) {
+                    System.out.println(i + "," + j);
+                }
+            }
+        }
+        System.out.println("-------------------");
+        for (int i = 0; i < calHeiNum; i++)
+        {
+            for (int j = 0; j < widNum; j++)
+            {
+                if (null == calBtnArr[i][j]) {
+                    System.out.println(i + "," + j);
+                }
+            }
+        }
+        System.out.println("cal-------------------");
+        if (leftBtn == 0)
+        {
+            // 倒数第二个运算符必须是=号
+            if (!"=".equals(expressBtnArr[widNum - 2].getText()))
+            {
+                tip.setText("运算表达式格式错误，请继续移动按钮");
+            }
+            else
+            {
+                StringBuilder express = new StringBuilder();
+                for (int i = 0; i < widNum - 2; i++)
+                {
+                    express.append(expressBtnArr[i].getText());
+                }
+                Eval eval = new Eval();
+                Object result;
+                try
+                {
+                    result = eval.calculate(express.toString());
+                    if (Integer.parseInt(expressBtnArr[widNum - 1]
+                            .getText().toString()) != Float.valueOf(result.toString()).intValue()) {
+                        // 计算的结果不相等  
+                        tip.setText("运算表达式结果不相等，请继续移动按钮");
+                    } else {
+                        // 计算结果相等
+                        score += Float.valueOf(result.toString()).intValue();
+                        succCnt += 1;
+                        totalScore.setText("总得分：" + score);
+                        totalCnt.setText("总成功次数:" + succCnt);
+                        tip.setText("成功啦!");
+                        /**
+                         * 1：给数字区取走的部分重新填充
+                         * 2：给运算符区取走的部分重新填充
+                         * 3：清除掉运算表达式以及存放运算表达式对应的Button的数组
+                         */
+                        for(int i=0;i<widNum;i++) {
+                            relativeLayout.removeView(findViewById(expressBtnArr[i].getId()));
+                            expressBtnArr[i] = null;
+                        }
+                        for (int i = 0; i < numHeiNum; i++)
+                        {
+                            for (int j = 0; j < widNum; j++)
+                            {
+                                if (null == numBtnArr[i][j]) {
+                                    addNumBtn(i, j, random);
+                                }
+                            }
+                        }
+                        
+                        for (int i = 0; i < calHeiNum; i++)
+                        {
+                            for (int j = 0; j < widNum; j++)
+                            {
+                                if (null == calBtnArr[i][j]) {
+                                    addCalBtn(i, j, random);
+                                }
+                            }
+                        }
+                        
+                        leftBtn = widNum;
+                        relativeLayout.postInvalidate();
+                    }
+                }
+                catch (ExpressionException e)
+                {
+                }
+            }
+        }
     }
     
     /**
@@ -370,24 +480,21 @@ public class StartGameFace extends Activity
         }
 
         // 放到目的运算表达式范围内
-        if ((t > btnHeight * (numHeiNum + calHeiNum) - btnHeight / 2 + 2
-                * splitHeight) && (t < btnHeight * (numHeiNum + calHeiNum + 1) + btnHeight / 2 + 2 * splitHeight))
+        if ((t >= btnHeight * (numHeiNum + calHeiNum) + 2
+                * splitHeight) && (t < btnHeight * (numHeiNum + calHeiNum + 1) + 2 * splitHeight))
         {
-            if (l % btnHeight * 2 > btnHeight)
-            {
-                l = btnHeight * (l / btnHeight) + btnHeight;
-            }
-            else
-            {
-                l = btnHeight * (l / btnHeight);
-            }
+            l = btnHeight * (l / btnHeight);
             t = btnHeight * (numHeiNum + calHeiNum) + 2 * splitHeight;
             // 如果目的运算表达式位置上没有按钮，则放到目的运算表达式范围内的正确格子中。
             if (null == expressBtnArr[l / btnHeight])
             {
                 v.layout(l, t, l + btnHeight, t + btnHeight);
                 expressBtnArr[l / btnHeight] = (Button)v;
-                System.out.println(v.getId());
+                if (isNumBtn(v.getId())) {
+                    numBtnArr[v.getId() / 10][v.getId() % 10] = null;
+                } else if (isCalBtn(v.getId())) {
+                    calBtnArr[v.getId() / 10 - numHeiNum][v.getId() % 10] = null;
+                }
                 leftBtn--;
             } else {
                 /**
@@ -405,7 +512,6 @@ public class StartGameFace extends Activity
                     int top = btnWidth * (v.getId() / 10);
                     int left = btnWidth * (v.getId() % 10);
                     
-                    
                     if (isNumBtn(v.getId()))
                     {
                         oldBtn.layout(left, top, left + btnWidth, top + btnWidth);
@@ -419,6 +525,11 @@ public class StartGameFace extends Activity
                     int tmpId = v.getId();
                     v.setId(oldBtn.getId());
                     oldBtn.setId(tmpId);
+                    if (isNumBtn(tmpId)) {
+                        numBtnArr[tmpId / 10][tmpId % 10] = oldBtn;
+                    } else if (isCalBtn(tmpId)) {
+                        calBtnArr[tmpId / 10 - numHeiNum][tmpId % 10] = oldBtn;
+                    }
                 } else {
                     int top = btnWidth * (v.getId() / 10);
                     int left = btnWidth * (v.getId() % 10);
@@ -430,60 +541,6 @@ public class StartGameFace extends Activity
                     {
                         v.layout(left, top + splitHeight, left + btnWidth, top + btnWidth
                                 + splitHeight);
-                    }
-                }
-            }
-            if (leftBtn == 0)
-            {
-                // 倒数第二个运算符必须是=号
-                if (!"=".equals(expressBtnArr[widNum - 2].getText()))
-                {
-                    // TODO 倒数第二个运算符不是=号，再说
-                }
-                else
-                {
-                    StringBuilder express = new StringBuilder();
-                    for (int i = 0; i < widNum - 2; i++)
-                    {
-                        express.append(expressBtnArr[i].getText());
-                    }
-                    Eval eval = new Eval();
-                    Object result;
-                    try
-                    {
-                        result = eval.calculate(express.toString());
-                        if (Integer.parseInt(expressBtnArr[widNum - 1]
-                                .getText().toString()) != Float.valueOf(result.toString()).intValue()) {
-                            // 计算的结果不相等  
-                            
-                        } else {
-                            // 计算结果相等
-                            score += Float.valueOf(result.toString()).intValue();
-                            succCnt += 1;
-                            totalScore.setText("总得分：" + score);
-                            totalCnt.setText("总成功次数:" + succCnt);
-                            /**
-                             * 1：给数字区取走的部分重新填充
-                             * 2：给运算符区取走的部分重新填充
-                             * 3：清除掉运算表达式以及存放运算表达式对应的Button的数组
-                             */
-                            int btnId = 0;
-                            for(int i=0;i<widNum;i++) {
-                                btnId = expressBtnArr[i].getId();
-                                relativeLayout.removeView(findViewById(expressBtnArr[i].getId()));
-                                expressBtnArr[i] = null;
-                                if (isNumBtn(btnId)) {
-                                    addNumBtn(btnId / 10, btnId % 10, random);
-                                } else {
-                                    addCalBtn(btnId / 10 - numHeiNum, btnId % 10, random);
-                                }
-                                leftBtn ++;
-                            }
-                            relativeLayout.postInvalidate();
-                        }
-                    }
-                    catch (ExpressionException e)
-                    {
                     }
                 }
             }
@@ -562,29 +619,22 @@ public class StartGameFace extends Activity
         }
 
         // 如果放到目的运算表达式范围内
-        if (t >= btnHeight * (numHeiNum + calHeiNum) - btnHeight / 2 + 2
-                * splitHeight)
+        if ((t >= btnHeight * (numHeiNum + calHeiNum) + 2
+                * splitHeight) && (t < btnHeight * (numHeiNum + calHeiNum + 1) + 2 * splitHeight))
         {
-            if (l % btnHeight * 2 > btnHeight)
-            {
-                l = btnHeight * (l / btnHeight) + btnHeight;
-            }
-            else
-            {
-                l = btnHeight * (l / btnHeight);
-            }
+            l = btnHeight * (l / btnHeight);
             t = btnHeight * (numHeiNum + calHeiNum) + 2 * splitHeight;
             
             // 如果待放的地方已经有了一个运算数或者运算符，则调换两者的位置。
             if (null != expressBtnArr[l / btnHeight]) {
                 Button oldBtn = expressBtnArr[l / btnHeight];
                 expressBtnArr[l / btnHeight] = (Button)v;
-                expressBtnArr[(int)event.getRawX() / btnHeight] = oldBtn;
+                expressBtnArr[btnLeft / btnHeight] = oldBtn;
                 oldBtn.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
             } else {
                 // 如果待放的地方没有运算数或者运算符，则直接移动一下该按钮的位置。
                 expressBtnArr[l / btnHeight] = (Button)v;
-                expressBtnArr[(int)event.getRawX() / btnHeight] = null;
+                expressBtnArr[btnLeft / btnHeight] = null;
             }
             v.layout(l, t, l + btnHeight, t + btnHeight);
             relativeLayout.postInvalidate();
@@ -592,59 +642,109 @@ public class StartGameFace extends Activity
         }
         
         // 如果放到数字区
-        if (t <= btnHeight * numHeiNum + btnHeight / 2) {
+        if (t < btnHeight * numHeiNum) {
+            l = btnHeight * (l / btnHeight);
+            t = btnHeight * (t / btnHeight);
+
             /**
-             * a:
-     *  a:如果待放的地方已经有了运算数，则调换两者的位置。
-     *  b:如果待放的地方没有运算数，则从目的运算表达式中移除，并且放置到正确的数字区。
+             *  a:如果该按钮不是数字，则返回原来的位置。
+             *  a:如果待放的地方已经有了运算数，则调换两者的位置。
+             *  b:如果待放的地方没有运算数，则从目的运算表达式中移除，并且放置到正确的数字区。
              */
             BtnType oldBtnType = getBtnType(v.getId());
             // 如果该按钮不是数字，则返回原来的位置。
             if (!BtnType.NUMBER.equals(oldBtnType)) {
                 v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
                 return;
+            } else if (null != numBtnArr[t / btnHeight][l / btnHeight]) {
+                Button oldBtn = numBtnArr[t / btnHeight][l / btnHeight];
+                int oldId = oldBtn.getId();
+                numBtnArr[t / btnHeight][l / btnHeight] = (Button)v;
+                expressBtnArr[btnLeft / btnHeight] = oldBtn;
+                v.layout(l, t, l + btnHeight, t + btnHeight);
+                oldBtn.layout(btnLeft, btnTop, btnLeft + btnHeight,  btnTop + btnHeight);
+                oldBtn.setId(v.getId());
+                v.setId(oldId);
+            } else if (null == numBtnArr[t / btnHeight][l / btnHeight]) {
+                v.layout(l, t, l + btnHeight, t + btnHeight);
+                expressBtnArr[btnLeft / btnHeight] = null;
+                numBtnArr[t / btnHeight][l / btnHeight] = (Button)v;
+                v.setId(10 * (t / btnHeight) + l / btnHeight);
+                leftBtn++;
             }
-            
+            relativeLayout.postInvalidate();
+            return;
         }
         
         // 如果放到运算符区
-        if ((t >= btnHeight * numHeiNum + splitHeight - btnHeight / 2) &&
-                (t <= btnHeight * (numHeiNum + calHeiNum) + splitHeight + btnHeight / 2)) {
+        if ((t >= btnHeight * numHeiNum + splitHeight) &&
+                (t < btnHeight * (numHeiNum + calHeiNum) + splitHeight)) {
+            System.out.println("运算符。。。。");
+            l = btnHeight * (l / btnHeight);
+            t = btnHeight * (t / btnHeight) + splitHeight;
             
+            /**
+             *  a:如果该按钮不是运算符，则返回原来的位置。
+             *  a:如果待放的地方已经有了运算符，则调换两者的位置。
+             *  b:如果待放的地方没有运算符，则从目的运算表达式中移除，并且放置到正确的运算区。
+             */
+            BtnType oldBtnType = getBtnType(v.getId());
+            // 如果该按钮不是数字，则返回原来的位置。
+            if (!BtnType.CALCULATE.equals(oldBtnType)) {
+                v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
+                return;
+            } else if (null != calBtnArr[t / btnHeight - numHeiNum][l / btnHeight]) {
+                Button oldBtn = calBtnArr[t / btnHeight - numHeiNum][l / btnHeight];
+                int oldId = oldBtn.getId();
+                calBtnArr[t / btnHeight - numHeiNum][l / btnHeight] = (Button)v;
+                expressBtnArr[btnLeft / btnHeight] = oldBtn;
+                v.layout(l, t, l + btnHeight, t + btnHeight);
+                oldBtn.layout(btnLeft, btnTop, btnLeft + btnHeight,  btnTop + btnHeight);
+                oldBtn.setId(v.getId());
+                v.setId(oldId);
+            } else if (null == calBtnArr[t / btnHeight - numHeiNum][l / btnHeight]) {
+                v.layout(l, t, l + btnHeight, t + btnHeight);
+                expressBtnArr[btnLeft / btnHeight] = null;
+                calBtnArr[t / btnHeight - numHeiNum][l / btnHeight] = (Button)v;
+                v.setId(10 * (t / btnHeight) + l / btnHeight);
+                leftBtn++;
+            }
+            relativeLayout.postInvalidate();
+            return;
         }
         
         // 如果放到非数字区、非运算符区以及非运算表达式范围内，则返回原来的位置
-            
+        v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
     }
     
     /**
      * 获取一个数字按钮ID
-     * @param widthIndex
+     * @param leftIndex
      * 横坐标顺序
-     * @param heightIndex
+     * @param topIndex
      * 纵坐标顺序
      * @return int
      * ID
      * @Exception 异常对象
      */
-    private int getNumId(int widthIndex, int heightIndex)
+    private int getNumId(int leftIndex, int topIndex)
     {
-        return 10 * heightIndex + widthIndex;
+        return 10 * leftIndex + topIndex;
     }
 
     /**
      * 获取一个运算符按钮ID
-     * @param widthIndex
+     * @param leftIndex
      * 横坐标顺序
-     * @param heightIndex
+     * @param topIndex
      * 纵坐标顺序
      * @return int
      * ID
      * @Exception 异常对象
      */
-    private int getCalId(int widthIndex, int heightIndex)
+    private int getCalId(int leftIndex, int topIndex)
     {
-        return 10 * (heightIndex + numHeiNum) + widthIndex;
+        return 10 * (leftIndex + numHeiNum) + topIndex;
     }
     
     /**
@@ -660,7 +760,7 @@ public class StartGameFace extends Activity
      * @Exception 异常对象
      */
     private static boolean isInNumArea(float rawX, float rawY) {
-        if (rawY <= numHeiNum * btnHeight) {
+        if (rawY < numHeiNum * btnHeight) {
             return Boolean.TRUE;
         } else {
             return Boolean.FALSE;
@@ -681,7 +781,7 @@ public class StartGameFace extends Activity
      */
     private static boolean isInCalArea(float rawX, float rawY) {
         if ((rawY >= numHeiNum * btnHeight + splitHeight) &&
-                (rawY <= numHeiNum * btnHeight + splitHeight + calHeiNum * btnHeight)) {
+                (rawY < numHeiNum * btnHeight + splitHeight + calHeiNum * btnHeight)) {
             return Boolean.TRUE;
         } else {
             return Boolean.FALSE;
@@ -702,7 +802,7 @@ public class StartGameFace extends Activity
      */
     private static boolean isInExpressArea(float rawX, float rawY) {
         if (rawY >= numHeiNum * btnHeight + splitHeight + calHeiNum * btnHeight + splitHeight &&
-                rawY <= numHeiNum * btnHeight + splitHeight + calHeiNum * btnHeight + splitHeight + btnHeight) {
+                rawY < numHeiNum * btnHeight + splitHeight + calHeiNum * btnHeight + splitHeight + btnHeight) {
             return Boolean.TRUE;
         } else {
             return Boolean.FALSE;
