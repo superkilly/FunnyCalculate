@@ -201,7 +201,7 @@ public class StartGameFace extends Activity
         tip = new TextView(this);
         tip.setText("请移动按钮");
         RelativeLayout.LayoutParams tipParams = new RelativeLayout.LayoutParams(
-                260, 30); // 设置按钮的宽度和高度
+                360, 30); // 设置按钮的宽度和高度
         tipParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 4 + 30; // 纵坐标定位
         tipParams.leftMargin = 0; // 横坐标定位
         relativeLayout.addView(tip, tipParams);
@@ -213,7 +213,8 @@ public class StartGameFace extends Activity
         numBtnArr[i][j] = new Button(this);
         // 按钮的ID是通过10*横序号+纵序号(考虑到一横最多不会超过10个按钮,一纵也不会超过10个)
         numBtnArr[i][j].setId(getNumId(i, j));
-        numBtnArr[i][j].setText("" + Math.abs(random.nextInt(i * splitHeight + j + 1)));
+//        numBtnArr[i][j].setText("" + Math.abs(random.nextInt(i * splitHeight + j + 1)));
+        numBtnArr[i][j].setText("" + getNumId(i, j));
         addMoveLister(numBtnArr[i][j]);
 
         GradientDrawable drawable = new GradientDrawable();
@@ -222,7 +223,7 @@ public class StartGameFace extends Activity
         drawable.setColor(0x22FFFF00); // 边框内部颜色
         numBtnArr[i][j].setBackground(drawable);
         
-        numBtnArr[i][j].setTextSize(10); // 设置按钮上字体大小
+        numBtnArr[i][j].setTextSize(8); // 设置按钮上字体大小
 
         RelativeLayout.LayoutParams btParams = new RelativeLayout.LayoutParams(btnWidth, btnHeight); // 设置按钮的宽度和高度
         // i表示的是第i行 k表示的是第k列
@@ -277,7 +278,6 @@ public class StartGameFace extends Activity
                 switch (ea)
                 {
                 case MotionEvent.ACTION_DOWN:
-                    System.out.println(v.getId());
                     // 获取触摸事件触摸位置的原始X坐标
                     btnLeft = v.getLeft();
                     btnTop = v.getTop();
@@ -329,6 +329,7 @@ public class StartGameFace extends Activity
                         expressActionUp(v, event, lastX, lastY, screenWidth, screenHeight, btnLeft, btnTop);
                     }
                     validate();
+                    relativeLayout.postInvalidate();
                     break;
                 }
                 return false;
@@ -342,27 +343,6 @@ public class StartGameFace extends Activity
      * @return void
      */
     private void validate() {
-        System.out.println("num-----------------");
-        for (int i = 0; i < numHeiNum; i++)
-        {
-            for (int j = 0; j < widNum; j++)
-            {
-                if (null == numBtnArr[i][j]) {
-                    System.out.println(i + "," + j);
-                }
-            }
-        }
-        System.out.println("-------------------");
-        for (int i = 0; i < calHeiNum; i++)
-        {
-            for (int j = 0; j < widNum; j++)
-            {
-                if (null == calBtnArr[i][j]) {
-                    System.out.println(i + "," + j);
-                }
-            }
-        }
-        System.out.println("cal-------------------");
         if (leftBtn == 0)
         {
             // 倒数第二个运算符必须是=号
@@ -398,32 +378,31 @@ public class StartGameFace extends Activity
                          * 2：给运算符区取走的部分重新填充
                          * 3：清除掉运算表达式以及存放运算表达式对应的Button的数组
                          */
-                        for(int i=0;i<widNum;i++) {
-                            relativeLayout.removeView(findViewById(expressBtnArr[i].getId()));
-                            expressBtnArr[i] = null;
-                        }
                         for (int i = 0; i < numHeiNum; i++)
                         {
                             for (int j = 0; j < widNum; j++)
                             {
                                 if (null == numBtnArr[i][j]) {
-                                    addNumBtn(i, j, random);
+//                                    addNumBtn(i, j, random);
                                 }
                             }
                         }
-                        
                         for (int i = 0; i < calHeiNum; i++)
                         {
                             for (int j = 0; j < widNum; j++)
                             {
                                 if (null == calBtnArr[i][j]) {
-                                    addCalBtn(i, j, random);
+//                                    addCalBtn(i, j, random);
                                 }
                             }
                         }
-                        
+                        for(int i=0;i<widNum;i++) {
+                            relativeLayout.removeView(findViewById(expressBtnArr[i].getId()));
+//                            relativeLayout.removeView(expressBtnArr[i]);
+//                            expressBtnArr[i].setVisibility(View.GONE);
+                            expressBtnArr[i] = null;
+                        }
                         leftBtn = widNum;
-                        relativeLayout.postInvalidate();
                     }
                 }
                 catch (ExpressionException e)
@@ -506,29 +485,24 @@ public class StartGameFace extends Activity
                 BtnType newBtnType = getBtnType(expressBtnArr[l / btnHeight].getId());
                 if (oldBtnType.equals(newBtnType)) {
                     Button oldBtn = expressBtnArr[l / btnHeight];
-                    v.layout(l, t, l + btnHeight, t + btnHeight);
-                    expressBtnArr[l / btnHeight] = (Button)v;
-                    
-                    int top = btnWidth * (v.getId() / 10);
-                    int left = btnWidth * (v.getId() % 10);
-                    
-                    if (isNumBtn(v.getId()))
-                    {
-                        oldBtn.layout(left, top, left + btnWidth, top + btnWidth);
-                    }
-                    else if (isCalBtn(v.getId()))
-                    {
-                        oldBtn.layout(left, top + 10, left + btnWidth, top + btnWidth
-                                + splitHeight);
-                    }
-                    
                     int tmpId = v.getId();
                     v.setId(oldBtn.getId());
                     oldBtn.setId(tmpId);
-                    if (isNumBtn(tmpId)) {
-                        numBtnArr[tmpId / 10][tmpId % 10] = oldBtn;
-                    } else if (isCalBtn(tmpId)) {
-                        calBtnArr[tmpId / 10 - numHeiNum][tmpId % 10] = oldBtn;
+                    v.layout(l, t, l + btnHeight, t + btnHeight);
+                    expressBtnArr[l / btnHeight] = (Button)v;
+                    
+                    int top = btnWidth * (oldBtn.getId() / 10);
+                    int left = btnWidth * (oldBtn.getId() % 10);
+                    if (isNumBtn(oldBtn.getId()))
+                    {
+                        oldBtn.layout(left, top, left + btnWidth, top + btnWidth);
+                        numBtnArr[oldBtn.getId() / 10][oldBtn.getId() % 10] = oldBtn;
+                    }
+                    else if (isCalBtn(oldBtn.getId()))
+                    {
+                        oldBtn.layout(left, top + 10, left + btnWidth, top + btnWidth
+                                + splitHeight);
+                        calBtnArr[oldBtn.getId() / 10 - numHeiNum][oldBtn.getId() % 10] = oldBtn;
                     }
                 } else {
                     int top = btnWidth * (v.getId() / 10);
@@ -637,12 +611,9 @@ public class StartGameFace extends Activity
                 expressBtnArr[btnLeft / btnHeight] = null;
             }
             v.layout(l, t, l + btnHeight, t + btnHeight);
-            relativeLayout.postInvalidate();
-            return;
         }
-        
         // 如果放到数字区
-        if (t < btnHeight * numHeiNum) {
+        else if (t < btnHeight * numHeiNum) {
             l = btnHeight * (l / btnHeight);
             t = btnHeight * (t / btnHeight);
 
@@ -655,7 +626,6 @@ public class StartGameFace extends Activity
             // 如果该按钮不是数字，则返回原来的位置。
             if (!BtnType.NUMBER.equals(oldBtnType)) {
                 v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
-                return;
             } else if (null != numBtnArr[t / btnHeight][l / btnHeight]) {
                 Button oldBtn = numBtnArr[t / btnHeight][l / btnHeight];
                 int oldId = oldBtn.getId();
@@ -672,14 +642,10 @@ public class StartGameFace extends Activity
                 v.setId(10 * (t / btnHeight) + l / btnHeight);
                 leftBtn++;
             }
-            relativeLayout.postInvalidate();
-            return;
         }
-        
         // 如果放到运算符区
-        if ((t >= btnHeight * numHeiNum + splitHeight) &&
+        else if ((t >= btnHeight * numHeiNum + splitHeight) &&
                 (t < btnHeight * (numHeiNum + calHeiNum) + splitHeight)) {
-            System.out.println("运算符。。。。");
             l = btnHeight * (l / btnHeight);
             t = btnHeight * (t / btnHeight) + splitHeight;
             
@@ -692,7 +658,6 @@ public class StartGameFace extends Activity
             // 如果该按钮不是数字，则返回原来的位置。
             if (!BtnType.CALCULATE.equals(oldBtnType)) {
                 v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
-                return;
             } else if (null != calBtnArr[t / btnHeight - numHeiNum][l / btnHeight]) {
                 Button oldBtn = calBtnArr[t / btnHeight - numHeiNum][l / btnHeight];
                 int oldId = oldBtn.getId();
@@ -709,12 +674,11 @@ public class StartGameFace extends Activity
                 v.setId(10 * (t / btnHeight) + l / btnHeight);
                 leftBtn++;
             }
-            relativeLayout.postInvalidate();
-            return;
         }
-        
         // 如果放到非数字区、非运算符区以及非运算表达式范围内，则返回原来的位置
-        v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
+        else {
+            v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
+        }
     }
     
     /**
