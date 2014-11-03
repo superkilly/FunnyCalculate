@@ -136,6 +136,7 @@ public class StartGameFace extends Activity
         setContentView(R.layout.start_game_face);
         relativeLayout = new RelativeLayout(this);
         relativeLayout.setId(121212);
+        relativeLayout.setBackgroundResource(R.drawable.startgame);
         DisplayMetrics dm = getResources().getDisplayMetrics();
         int screenWidth = dm.widthPixels;
         int screenHeight = dm.heightPixels;
@@ -219,11 +220,11 @@ public class StartGameFace extends Activity
 
         GradientDrawable drawable = new GradientDrawable();
         drawable.setShape(GradientDrawable.RECTANGLE); // 画框
-        drawable.setStroke(1, Color.BLUE); // 边框粗细及颜色
-        drawable.setColor(0x22FFFF00); // 边框内部颜色
+        drawable.setStroke(1, Color.argb(0xEE, 0x8E, 0xE5, 0XEE)); // 边框粗细及颜色
+        drawable.setColor(0x5000FF00); // 边框内部颜色
         numBtnArr[i][j].setBackground(drawable);
-        
-        numBtnArr[i][j].setTextSize(8); // 设置按钮上字体大小
+        numBtnArr[i][j].setTextSize(10); // 设置按钮上字体大小
+        numBtnArr[i][j].setTextColor(0xFF1022FF);
 
         RelativeLayout.LayoutParams btParams = new RelativeLayout.LayoutParams(btnWidth, btnHeight); // 设置按钮的宽度和高度
         // i表示的是第i行 k表示的是第k列
@@ -244,6 +245,7 @@ public class StartGameFace extends Activity
         drawable.setStroke(1, Color.YELLOW); // 边框粗细及颜色
         drawable.setColor(0x44FF2200); // 边框内部颜色
         calBtnArr[i][j].setBackground(drawable);
+        calBtnArr[i][j].setTextSize(12); // 设置按钮上字体大小
 
         RelativeLayout.LayoutParams btParams = new RelativeLayout.LayoutParams(
                 btnWidth, btnHeight); // 设置按钮的宽度和高度
