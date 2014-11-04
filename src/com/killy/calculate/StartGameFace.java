@@ -21,7 +21,7 @@ import com.killy.calculate.Eval.ExpressionException;
 /**
  * 逻辑说明
  * 1：当从数字区或者运算符区往表达式区拖拽按钮的时候，当按钮有一半在表达式区的时候，就落子；其他情况，按钮还是回到其原来的地方。
- * 2：当落子的时候，假设该位置上已经有了按钮，则调换该位置的按钮和来源按钮。【Not Finish】
+ * 2：当落子的时候，假设该位置上已经有了按钮，则调换该位置的按钮和来源按钮。
  * 3：从表达式区将按钮往数字区或者运算符区拖拽的时候，当按钮有一半在数字区或者运算符区的时候，就落子；当按钮有一半在表达式区的时候，则落子。
  * 4：当落子的时候，假设该位置上已经有了按钮，则调换该位置的按钮和来源按钮。
  * 5：当整个表达式已经占满的时候，自动计算表达式是否正确。如果正确，则计分，清空表达式，重新填充已经空掉的数字区和运算符区；
@@ -210,12 +210,20 @@ public class StartGameFace extends Activity
         setContentView(relativeLayout);
     }
 
+    /**
+     * 新增运算数按钮
+     * @param i
+     * 从左上角往下数第i行
+     * @param j
+     * 从左上角往右数第j列
+     * @param random
+     * 产生随机数对象
+     */
     private void addNumBtn(int i, int j, Random random) {
         numBtnArr[i][j] = new Button(this);
         // 按钮的ID是通过10*横序号+纵序号(考虑到一横最多不会超过10个按钮,一纵也不会超过10个)
         numBtnArr[i][j].setId(getNumId(i, j));
-//        numBtnArr[i][j].setText("" + Math.abs(random.nextInt(i * splitHeight + j + 1)));
-        numBtnArr[i][j].setText("" + getNumId(i, j));
+        numBtnArr[i][j].setText("" + Math.abs(random.nextInt(i * splitHeight + j + 1)));
         addMoveLister(numBtnArr[i][j]);
 
         GradientDrawable drawable = new GradientDrawable();
@@ -233,6 +241,15 @@ public class StartGameFace extends Activity
         relativeLayout.addView(numBtnArr[i][j], btParams);
     }
     
+    /**
+     * 新增运算符按钮
+     * @param i
+     * 从左上角往下数第i行
+     * @param j
+     * 从左上角往右数第j列
+     * @param random
+     * 产生随机数对象
+     */
     private void addCalBtn(int i, int j, Random random) {
         calBtnArr[i][j] = new Button(this);
         // 按钮的ID是通过2000+10*横序号+纵序号(考虑到一横最多不会超过10个按钮,一纵也不会超过10个)
@@ -264,9 +281,6 @@ public class StartGameFace extends Activity
 
     private void addMoveLister(final Button btn)
     {
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        final int screenWidth = dm.widthPixels;
-        final int screenHeight = dm.heightPixels - 50;
         btn.setOnTouchListener(new OnTouchListener()
         {
             int lastX, lastY;
@@ -289,33 +303,11 @@ public class StartGameFace extends Activity
                     v.postInvalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    int dx = (int) event.getRawX() - lastX;
-                    int dy = (int) event.getRawY() - lastY;
-                    int l = v.getLeft() + dx;
-                    int b = v.getBottom() + dy;
-                    int r = v.getRight() + dx;
-                    int t = v.getTop() + dy;
-                    // 下面判断移动是否超出屏幕
-                    if (l < 0)
-                    {
-                        l = 0;
-                        r = l + v.getWidth();
-                    }
-                    if (t < 0)
-                    {
-                        t = 0;
-                        b = t + v.getHeight();
-                    }
-                    if (r > screenWidth)
-                    {
-                        r = screenWidth;
-                        l = r - v.getWidth();
-                    }
-                    if (b > screenHeight)
-                    {
-                        b = screenHeight;
-                        t = b - v.getHeight();
-                    }
+                	Location location = getLocation(v, event, lastX, lastY);
+                    int l = location.getLeft();
+                    int b = location.getBotton();
+                    int r = location.getRight();
+                    int t = location.getTop();
                     v.layout(l, t, r, b);
                     lastX = (int) event.getRawX();
                     lastY = (int) event.getRawY();
@@ -325,10 +317,10 @@ public class StartGameFace extends Activity
                     // 按钮原来的位置在数字区或者运算符区
                     if (isInNumArea(btnLeft, btnTop) || 
                             isInCalArea(btnLeft, btnTop)) {
-                        numCalActionUp(v, event, lastX, lastY, screenWidth, screenHeight);
+                        numCalActionUp(v, event, lastX, lastY);
                     } else if (isInExpressArea(btnLeft, btnTop)){
                         // 按钮原来的位置在目的运算表达式区
-                        expressActionUp(v, event, lastX, lastY, screenWidth, screenHeight, btnLeft, btnTop);
+                        expressActionUp(v, event, lastX, lastY);
                     }
                     validate();
                     relativeLayout.postInvalidate();
@@ -375,40 +367,43 @@ public class StartGameFace extends Activity
                         totalScore.setText("总得分：" + score);
                         totalCnt.setText("总成功次数:" + succCnt);
                         tip.setText("成功啦!");
+                        
                         /**
-                         * 1：给数字区取走的部分重新填充
-                         * 2：给运算符区取走的部分重新填充
-                         * 3：清除掉运算表达式以及存放运算表达式对应的Button的数组
+                         * 1：清除掉运算表达式以及存放运算表达式对应的Button的数组
+                         * 2：给数字区取走的部分重新填充
+                         * 3：给运算符区取走的部分重新填充
                          */
+                        for(int i=0;i<widNum;i++) {
+                        	relativeLayout.removeView(expressBtnArr[i]);
+                        	expressBtnArr[i] = null;
+                        }
+                        
                         for (int i = 0; i < numHeiNum; i++)
                         {
                             for (int j = 0; j < widNum; j++)
                             {
                                 if (null == numBtnArr[i][j]) {
-//                                    addNumBtn(i, j, random);
+                                    addNumBtn(i, j, random);
                                 }
                             }
                         }
+                        
                         for (int i = 0; i < calHeiNum; i++)
                         {
                             for (int j = 0; j < widNum; j++)
                             {
                                 if (null == calBtnArr[i][j]) {
-//                                    addCalBtn(i, j, random);
+                                    addCalBtn(i, j, random);
                                 }
                             }
                         }
-                        for(int i=0;i<widNum;i++) {
-                            relativeLayout.removeView(findViewById(expressBtnArr[i].getId()));
-//                            relativeLayout.removeView(expressBtnArr[i]);
-//                            expressBtnArr[i].setVisibility(View.GONE);
-                            expressBtnArr[i] = null;
-                        }
+
                         leftBtn = widNum;
                     }
                 }
                 catch (ExpressionException e)
                 {
+                	tip.setText("运算表达式格式非法，请继续移动按钮");
                 }
             }
         }
@@ -424,57 +419,30 @@ public class StartGameFace extends Activity
      * @param event
      * @param lastX
      * @param lastY
-     * @param screenWidth
-     * @param screenHeight
      * @Exception 异常对象
      * @return void
      */
-    private void numCalActionUp(View v, MotionEvent event, int lastX, int lastY,
-            int screenWidth, int screenHeight)
+    private void numCalActionUp(View v, MotionEvent event, int lastX, int lastY)
     {
-        int dx = (int) event.getRawX() - lastX;
-        int dy = (int) event.getRawY() - lastY;
-        int l = v.getLeft() + dx;
-        int b = v.getBottom() + dy;
-        int r = v.getRight() + dx;
-        int t = v.getTop() + dy;
-        // 下面判断移动是否超出屏幕
-        if (l < 0)
-        {
-            l = 0;
-            r = l + v.getWidth();
-        }
-        if (t < 0)
-        {
-            t = 0;
-            b = t + v.getHeight();
-        }
-        if (r > screenWidth)
-        {
-            r = screenWidth;
-            l = r - v.getWidth();
-        }
-        if (b > screenHeight)
-        {
-            b = screenHeight;
-            t = b - v.getHeight();
-        }
+    	Location location = getLocation(v, event, lastX, lastY);
+        int l = location.getLeft();
+        int t = location.getTop();
 
         // 放到目的运算表达式范围内
-        if ((t >= btnHeight * (numHeiNum + calHeiNum) + 2
-                * splitHeight) && (t < btnHeight * (numHeiNum + calHeiNum + 1) + 2 * splitHeight))
+        if (isInExpressArea(l, t))
         {
             l = btnHeight * (l / btnHeight);
             t = btnHeight * (numHeiNum + calHeiNum) + 2 * splitHeight;
             // 如果目的运算表达式位置上没有按钮，则放到目的运算表达式范围内的正确格子中。
             if (null == expressBtnArr[l / btnHeight])
             {
-                v.layout(l, t, l + btnHeight, t + btnHeight);
+                moveBtn((Button)v, l, t);
+                
                 expressBtnArr[l / btnHeight] = (Button)v;
                 if (isNumBtn(v.getId())) {
-                    numBtnArr[v.getId() / 10][v.getId() % 10] = null;
+                    numBtnArr[v.getId() / Const.NUM_TEN][v.getId() % Const.NUM_TEN] = null;
                 } else if (isCalBtn(v.getId())) {
-                    calBtnArr[v.getId() / 10 - numHeiNum][v.getId() % 10] = null;
+                    calBtnArr[v.getId() / Const.NUM_TEN - numHeiNum][v.getId() % Const.NUM_TEN] = null;
                 }
                 leftBtn--;
             } else {
@@ -490,33 +458,31 @@ public class StartGameFace extends Activity
                     int tmpId = v.getId();
                     v.setId(oldBtn.getId());
                     oldBtn.setId(tmpId);
-                    v.layout(l, t, l + btnHeight, t + btnHeight);
+                    moveBtn((Button)v, l, t);
                     expressBtnArr[l / btnHeight] = (Button)v;
                     
-                    int top = btnWidth * (oldBtn.getId() / 10);
-                    int left = btnWidth * (oldBtn.getId() % 10);
+                    int top = btnWidth * (oldBtn.getId() / Const.NUM_TEN);
+                    int left = btnWidth * (oldBtn.getId() % Const.NUM_TEN);
                     if (isNumBtn(oldBtn.getId()))
                     {
-                        oldBtn.layout(left, top, left + btnWidth, top + btnWidth);
-                        numBtnArr[oldBtn.getId() / 10][oldBtn.getId() % 10] = oldBtn;
+                        moveBtn(oldBtn, left, top);
+                        numBtnArr[oldBtn.getId() / Const.NUM_TEN][oldBtn.getId() % Const.NUM_TEN] = oldBtn;
                     }
                     else if (isCalBtn(oldBtn.getId()))
                     {
-                        oldBtn.layout(left, top + 10, left + btnWidth, top + btnWidth
-                                + splitHeight);
-                        calBtnArr[oldBtn.getId() / 10 - numHeiNum][oldBtn.getId() % 10] = oldBtn;
+                        moveBtn(oldBtn, left, top + Const.NUM_TEN);
+                        calBtnArr[oldBtn.getId() / Const.NUM_TEN - numHeiNum][oldBtn.getId() % Const.NUM_TEN] = oldBtn;
                     }
                 } else {
-                    int top = btnWidth * (v.getId() / 10);
-                    int left = btnWidth * (v.getId() % 10);
+                    int top = btnWidth * (v.getId() / Const.NUM_TEN);
+                    int left = btnWidth * (v.getId() % Const.NUM_TEN);
                     if (isNumBtn(v.getId()))
                     {
-                        v.layout(left, top, left + btnWidth, top + btnWidth);
+                        moveBtn((Button)v, left, top);
                     }
                     else if (isCalBtn(v.getId()))
                     {
-                        v.layout(left, top + splitHeight, left + btnWidth, top + btnWidth
-                                + splitHeight);
+                        moveBtn((Button)v, left, top + splitHeight);
                     }
                 }
             }
@@ -526,16 +492,15 @@ public class StartGameFace extends Activity
          */
         else
         {
-            int top = btnWidth * (v.getId() / 10);
-            int left = btnWidth * (v.getId() % 10);
+            int top = btnWidth * (v.getId() / Const.NUM_TEN);
+            int left = btnWidth * (v.getId() % Const.NUM_TEN);
             if (isNumBtn(v.getId()))
             {
-                v.layout(left, top, left + btnWidth, top + btnWidth);
+                moveBtn((Button)v, left, top);
             }
             else if (isCalBtn(v.getId()))
             {
-                v.layout(left, top + 10, left + btnWidth, top + btnWidth
-                        + splitHeight);
+                moveBtn((Button)v, left, top + Const.NUM_TEN);
             }
         }
     }
@@ -558,45 +523,20 @@ public class StartGameFace extends Activity
      * @param event
      * @param lastX
      * @param lastY
-     * @param screenWidth
-     * @param screenHeight
      * @Exception 异常对象
      * @return void
      */
-    private void expressActionUp(View v, MotionEvent event, int lastX, int lastY,
-            int screenWidth, int screenHeight, int btnLeft, int btnTop)
+    private void expressActionUp(View v, MotionEvent event, int lastX, int lastY)
     {
-        int dx = (int) event.getRawX() - lastX;
-        int dy = (int) event.getRawY() - lastY;
-        int l = v.getLeft() + dx;
-        int b = v.getBottom() + dy;
-        int r = v.getRight() + dx;
-        int t = v.getTop() + dy;
-        // 下面判断移动是否超出屏幕
-        if (l < 0)
-        {
-            l = 0;
-            r = l + v.getWidth();
-        }
-        if (t < 0)
-        {
-            t = 0;
-            b = t + v.getHeight();
-        }
-        if (r > screenWidth)
-        {
-            r = screenWidth;
-            l = r - v.getWidth();
-        }
-        if (b > screenHeight)
-        {
-            b = screenHeight;
-            t = b - v.getHeight();
-        }
+    	RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)((Button)v).getLayoutParams();
+    	int btnOldLeft = params.leftMargin;
+    	int btnOldTop = params.topMargin;
+        Location location = getLocation(v, event, lastX, lastY);
+        int l = location.getLeft();
+        int t = location.getTop();
 
         // 如果放到目的运算表达式范围内
-        if ((t >= btnHeight * (numHeiNum + calHeiNum) + 2
-                * splitHeight) && (t < btnHeight * (numHeiNum + calHeiNum + 1) + 2 * splitHeight))
+        if (isInExpressArea(l, t))
         {
             l = btnHeight * (l / btnHeight);
             t = btnHeight * (numHeiNum + calHeiNum) + 2 * splitHeight;
@@ -605,17 +545,17 @@ public class StartGameFace extends Activity
             if (null != expressBtnArr[l / btnHeight]) {
                 Button oldBtn = expressBtnArr[l / btnHeight];
                 expressBtnArr[l / btnHeight] = (Button)v;
-                expressBtnArr[btnLeft / btnHeight] = oldBtn;
-                oldBtn.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
+                expressBtnArr[btnOldLeft / btnHeight] = oldBtn;
+                moveBtn(oldBtn, btnOldLeft, btnOldTop);
             } else {
                 // 如果待放的地方没有运算数或者运算符，则直接移动一下该按钮的位置。
                 expressBtnArr[l / btnHeight] = (Button)v;
-                expressBtnArr[btnLeft / btnHeight] = null;
+                expressBtnArr[btnOldLeft / btnHeight] = null;
             }
-            v.layout(l, t, l + btnHeight, t + btnHeight);
+            moveBtn((Button)v, l, t);
         }
         // 如果放到数字区
-        else if (t < btnHeight * numHeiNum) {
+        else if (isInNumArea(l, t)) {
             l = btnHeight * (l / btnHeight);
             t = btnHeight * (t / btnHeight);
 
@@ -627,27 +567,26 @@ public class StartGameFace extends Activity
             BtnType oldBtnType = getBtnType(v.getId());
             // 如果该按钮不是数字，则返回原来的位置。
             if (!BtnType.NUMBER.equals(oldBtnType)) {
-                v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
+                moveBtn((Button)v, btnOldLeft, btnOldTop);
             } else if (null != numBtnArr[t / btnHeight][l / btnHeight]) {
                 Button oldBtn = numBtnArr[t / btnHeight][l / btnHeight];
                 int oldId = oldBtn.getId();
                 numBtnArr[t / btnHeight][l / btnHeight] = (Button)v;
-                expressBtnArr[btnLeft / btnHeight] = oldBtn;
-                v.layout(l, t, l + btnHeight, t + btnHeight);
-                oldBtn.layout(btnLeft, btnTop, btnLeft + btnHeight,  btnTop + btnHeight);
+                expressBtnArr[btnOldLeft / btnHeight] = oldBtn;
+                moveBtn((Button)v, l, t);
+                moveBtn(oldBtn, btnOldLeft, btnOldTop);
                 oldBtn.setId(v.getId());
                 v.setId(oldId);
             } else if (null == numBtnArr[t / btnHeight][l / btnHeight]) {
-                v.layout(l, t, l + btnHeight, t + btnHeight);
-                expressBtnArr[btnLeft / btnHeight] = null;
+                moveBtn((Button)v, l, t);
+                expressBtnArr[btnOldLeft / btnHeight] = null;
                 numBtnArr[t / btnHeight][l / btnHeight] = (Button)v;
-                v.setId(10 * (t / btnHeight) + l / btnHeight);
+                v.setId(getNumId(t / btnHeight, l / btnHeight));
                 leftBtn++;
             }
         }
         // 如果放到运算符区
-        else if ((t >= btnHeight * numHeiNum + splitHeight) &&
-                (t < btnHeight * (numHeiNum + calHeiNum) + splitHeight)) {
+        else if (isInCalArea(l, t)) {
             l = btnHeight * (l / btnHeight);
             t = btnHeight * (t / btnHeight) + splitHeight;
             
@@ -659,27 +598,31 @@ public class StartGameFace extends Activity
             BtnType oldBtnType = getBtnType(v.getId());
             // 如果该按钮不是数字，则返回原来的位置。
             if (!BtnType.CALCULATE.equals(oldBtnType)) {
-                v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
+                moveBtn((Button)v, btnOldLeft, btnOldTop);
             } else if (null != calBtnArr[t / btnHeight - numHeiNum][l / btnHeight]) {
                 Button oldBtn = calBtnArr[t / btnHeight - numHeiNum][l / btnHeight];
                 int oldId = oldBtn.getId();
                 calBtnArr[t / btnHeight - numHeiNum][l / btnHeight] = (Button)v;
-                expressBtnArr[btnLeft / btnHeight] = oldBtn;
-                v.layout(l, t, l + btnHeight, t + btnHeight);
-                oldBtn.layout(btnLeft, btnTop, btnLeft + btnHeight,  btnTop + btnHeight);
+                expressBtnArr[btnOldLeft / btnHeight] = oldBtn;
+                
+                moveBtn((Button)v, l, t);
+                moveBtn(oldBtn, btnOldLeft, btnOldTop);
+                
                 oldBtn.setId(v.getId());
                 v.setId(oldId);
             } else if (null == calBtnArr[t / btnHeight - numHeiNum][l / btnHeight]) {
-                v.layout(l, t, l + btnHeight, t + btnHeight);
-                expressBtnArr[btnLeft / btnHeight] = null;
+                moveBtn((Button)v, l, t);
+                
+                expressBtnArr[btnOldLeft / btnHeight] = null;
                 calBtnArr[t / btnHeight - numHeiNum][l / btnHeight] = (Button)v;
-                v.setId(10 * (t / btnHeight) + l / btnHeight);
+                v.setId(Const.NUM_TEN * (t / btnHeight) + l / btnHeight);
+                
                 leftBtn++;
             }
         }
         // 如果放到非数字区、非运算符区以及非运算表达式范围内，则返回原来的位置
         else {
-            v.layout(btnLeft, btnTop, btnLeft + btnHeight, btnTop + btnHeight);
+            moveBtn((Button)v, btnOldLeft, btnOldTop);
         }
     }
     
@@ -695,7 +638,7 @@ public class StartGameFace extends Activity
      */
     private int getNumId(int leftIndex, int topIndex)
     {
-        return 10 * leftIndex + topIndex;
+        return Const.NUM_TEN * leftIndex + topIndex;
     }
 
     /**
@@ -710,7 +653,7 @@ public class StartGameFace extends Activity
      */
     private int getCalId(int leftIndex, int topIndex)
     {
-        return 10 * (leftIndex + numHeiNum) + topIndex;
+        return Const.NUM_TEN * (leftIndex + numHeiNum) + topIndex;
     }
     
     /**
@@ -767,8 +710,8 @@ public class StartGameFace extends Activity
      * @Exception 异常对象
      */
     private static boolean isInExpressArea(float rawX, float rawY) {
-        if (rawY >= numHeiNum * btnHeight + splitHeight + calHeiNum * btnHeight + splitHeight &&
-                rawY < numHeiNum * btnHeight + splitHeight + calHeiNum * btnHeight + splitHeight + btnHeight) {
+        if (rawY >= (numHeiNum + calHeiNum) * btnHeight + 2 * splitHeight &&
+                rawY < (numHeiNum + calHeiNum + 1) * btnHeight + 2 * splitHeight) {
             return Boolean.TRUE;
         } else {
             return Boolean.FALSE;
@@ -785,7 +728,7 @@ public class StartGameFace extends Activity
      */
     private boolean isNumBtn(int id)
     {
-        if (id / 10 < numHeiNum)
+        if (id / Const.NUM_TEN < numHeiNum)
         {
             return Boolean.TRUE;
         }
@@ -805,7 +748,7 @@ public class StartGameFace extends Activity
      */
     private boolean isCalBtn(int id)
     {
-        if (id / 10 >= numHeiNum && id / 10 < calHeiNum + numHeiNum)
+        if (id / Const.NUM_TEN >= numHeiNum && id / Const.NUM_TEN < calHeiNum + numHeiNum)
         {
             return Boolean.TRUE;
         }
@@ -832,6 +775,63 @@ public class StartGameFace extends Activity
         }
     }
     
+    /**
+     * 移动一个按钮
+     * @param v
+     * 待移动的按钮对象
+     * @param left
+     * 按钮移动之后的距离屏幕左侧的位置
+     * @param top
+     * 按钮移动之后的距离屏幕上方的位置
+     */
+    private void moveBtn(Button btn, int left, int top) {
+    	btn.layout(left, top, left + btnHeight, top + btnHeight);
+        RelativeLayout.LayoutParams btParams = new RelativeLayout.LayoutParams(btnWidth, btnHeight); // 设置按钮的宽度和高度
+        // i表示的是第i行 k表示的是第k列
+        btParams.leftMargin = left; // 横坐标定位[距离屏幕最左上方往右]
+        btParams.topMargin = top; // 纵坐标定位[距离屏幕最左上方往下]
+        btn.setLayoutParams(btParams);
+    }
+    
+    private Location getLocation(View v, MotionEvent event, int lastX, int lastY) {
+    	DisplayMetrics dm = getResources().getDisplayMetrics();
+        int screenWidth = dm.widthPixels;
+        int screenHeight = dm.heightPixels - 50;
+    	Location location = new Location();
+    	int dx = (int) event.getRawX() - lastX;
+        int dy = (int) event.getRawY() - lastY;
+        int left = v.getLeft() + dx;
+        int botton = v.getBottom() + dy;
+        int right = v.getRight() + dx;
+        int top = v.getTop() + dy;
+        // 下面判断移动是否超出屏幕
+        if (left < 0)
+        {
+            left = 0;
+            right = left + v.getWidth();
+        }
+        if (top < 0)
+        {
+            top = 0;
+            botton = top + v.getHeight();
+        }
+        if (right > screenWidth)
+        {
+            right = screenWidth;
+            left = right - v.getWidth();
+        }
+        if (botton > screenHeight)
+        {
+            botton = screenHeight;
+            top = botton - v.getHeight();
+        }
+        location.setLeft(left);
+        location.setTop(top);
+        location.setRight(right);
+        location.setBotton(botton);
+        return location;
+    }
+    
     enum BtnType {
         /**
          * 运算数
@@ -845,5 +845,36 @@ public class StartGameFace extends Activity
          * 表达式
          */
         EXPRESS;
+    }
+    
+    class Location {
+    	private int left;
+    	private int top;
+    	private int right;
+    	private int botton;
+		public int getLeft() {
+			return left;
+		}
+		public void setLeft(int left) {
+			this.left = left;
+		}
+		public int getTop() {
+			return top;
+		}
+		public void setTop(int top) {
+			this.top = top;
+		}
+		public int getRight() {
+			return right;
+		}
+		public void setRight(int right) {
+			this.right = right;
+		}
+		public int getBotton() {
+			return botton;
+		}
+		public void setBotton(int botton) {
+			this.botton = botton;
+		}
     }
 }
