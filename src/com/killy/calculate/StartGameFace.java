@@ -185,7 +185,7 @@ public class StartGameFace extends Activity
         totalScore.setText("总得分：" + score);
         totalScore.setTextColor(Color.BLACK);
         RelativeLayout.LayoutParams totalScoreParams = new RelativeLayout.LayoutParams(
-                160, 30); // 设置按钮的宽度和高度
+                160, 40); // 设置按钮的宽度和高度
         totalScoreParams.leftMargin = 0;// 横坐标定位
         totalScoreParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3;// 纵坐标定位
         totalScore.setLayoutParams(totalScoreParams);
@@ -194,7 +194,7 @@ public class StartGameFace extends Activity
         totalCnt = new TextView(this);
         totalCnt.setText("总成功次数：" + succCnt);
         RelativeLayout.LayoutParams totalCntParams = new RelativeLayout.LayoutParams(
-                160, 30); // 设置按钮的宽度和高度
+                260, 40); // 设置按钮的宽度和高度
         totalCntParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3; // 纵坐标定位
         totalCntParams.leftMargin = 160 + 10; // 横坐标定位
         relativeLayout.addView(totalCnt, totalCntParams);
@@ -202,8 +202,8 @@ public class StartGameFace extends Activity
         tip = new TextView(this);
         tip.setText("请移动按钮");
         RelativeLayout.LayoutParams tipParams = new RelativeLayout.LayoutParams(
-                360, 30); // 设置按钮的宽度和高度
-        tipParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 4 + 30; // 纵坐标定位
+                460, 40); // 设置按钮的宽度和高度
+        tipParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 4 + 40; // 纵坐标定位
         tipParams.leftMargin = 0; // 横坐标定位
         relativeLayout.addView(tip, tipParams);
         
@@ -290,8 +290,7 @@ public class StartGameFace extends Activity
             @Override
             public boolean onTouch(View v, MotionEvent event)
             {
-                int ea = event.getAction();
-                switch (ea)
+                switch (event.getAction())
                 {
                 case MotionEvent.ACTION_DOWN:
                     // 获取触摸事件触摸位置的原始X坐标
@@ -311,7 +310,6 @@ public class StartGameFace extends Activity
                     v.layout(l, t, r, b);
                     lastX = (int) event.getRawX();
                     lastY = (int) event.getRawY();
-                    v.postInvalidate();
                     break;
                 case MotionEvent.ACTION_UP:
                     // 按钮原来的位置在数字区或者运算符区
