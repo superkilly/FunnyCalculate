@@ -7,7 +7,11 @@ import android.view.Menu;
 import android.view.View;
 
 public class MainFace extends Activity {
-
+    /**
+     * 整个系统最高分
+     */
+    public static int HIGH_SCORE = 0;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

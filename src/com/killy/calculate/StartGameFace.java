@@ -4,10 +4,13 @@ import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
@@ -96,7 +99,7 @@ public class StartGameFace extends Activity
     /**
      * 运算符列表
      */
-    private static final String[] calArr = { "+", "-", "*", "/", "=" };
+    private static final String[] calArr = { "=", "+", "-", "*", "/"};
     
     /**
      * 总成功次数
@@ -139,7 +142,6 @@ public class StartGameFace extends Activity
         relativeLayout.setBackgroundResource(R.drawable.startgame);
         DisplayMetrics dm = getResources().getDisplayMetrics();
         int screenWidth = dm.widthPixels;
-        int screenHeight = dm.heightPixels;
         btnWidth = screenWidth / widNum;
         btnHeight = btnWidth;
         
@@ -163,48 +165,70 @@ public class StartGameFace extends Activity
 
         // 添加待填充的运算格子
         RelativeLayout waitCalLayout = new RelativeLayout(this);
-        waitCalLayout.layout(0, btnHeight
-                * (numHeiNum + calHeiNum + splitHeight * 2), screenWidth,
-                screenHeight);
         GradientDrawable drawable = new GradientDrawable();
         drawable.setShape(GradientDrawable.RECTANGLE); // 画框
-        drawable.setStroke(2, Color.RED); // 边框粗细及颜色
-        drawable.setColor(0xFF662200); // 边框内部颜色
+        drawable.setStroke(1, 0xFFFF3030); // 边框粗细及颜色
+        drawable.setColor(0x4F66FF20); // 边框内部颜色
         waitCalLayout.setBackground(drawable);
         RelativeLayout.LayoutParams layParams = new RelativeLayout.LayoutParams(
-                screenWidth - 10, screenHeight - 10 - btnHeight
-                        * (numHeiNum + calHeiNum + splitHeight * 2)); // 设置按钮的宽度和高度
+                screenWidth, btnHeight + 2); // 设置按钮的宽度和高度
         // i表示的是第i行 k表示的是第k列
         layParams.topMargin = btnHeight
-                * (numHeiNum + calHeiNum + splitHeight * 2); // 纵坐标定位
+                * (numHeiNum + calHeiNum) + splitHeight * 2 - 1; // 纵坐标定位
         layParams.leftMargin = 0; // 横坐标定位
         relativeLayout.addView(waitCalLayout, layParams);
 
         // 添加结果显示
+        TextView totalScoreLbl = new TextView(this);
+        totalScoreLbl.setText("总得分：");
+        totalScoreLbl.setTextColor(Color.BLACK);
+        RelativeLayout.LayoutParams totalScoreLblParams = new RelativeLayout.LayoutParams(
+                90, 30); // 设置按钮的宽度和高度
+        totalScoreLblParams.leftMargin = 0;// 横坐标定位
+        totalScoreLblParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3;// 纵坐标定位
+        relativeLayout.addView(totalScoreLbl, totalScoreLblParams);
         totalScore = new TextView(this);
-        totalScore.setText("总得分：" + score);
-        totalScore.setTextColor(Color.BLACK);
+        totalScore.setText("0");
+        totalScore.setTextColor(Color.RED);
+        totalScore.setGravity(Gravity.LEFT);
         RelativeLayout.LayoutParams totalScoreParams = new RelativeLayout.LayoutParams(
-                160, 40); // 设置按钮的宽度和高度
-        totalScoreParams.leftMargin = 0;// 横坐标定位
+                70, 30); // 设置按钮的宽度和高度
+        totalScoreParams.leftMargin = 90;// 横坐标定位
         totalScoreParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3;// 纵坐标定位
-        totalScore.setLayoutParams(totalScoreParams);
-        relativeLayout.addView(totalScore);
+        relativeLayout.addView(totalScore, totalScoreParams);
 
+        TextView totalCntLbl = new TextView(this);
+        totalCntLbl.setText("总成功次数：");
+        RelativeLayout.LayoutParams totalCntLblParams = new RelativeLayout.LayoutParams(
+                130, 30); // 设置按钮的宽度和高度
+        totalCntLblParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3; // 纵坐标定位
+        totalCntLblParams.leftMargin = 160; // 横坐标定位
+        relativeLayout.addView(totalCntLbl, totalCntLblParams);
         totalCnt = new TextView(this);
-        totalCnt.setText("总成功次数：" + succCnt);
+        totalCnt.setText("0");
+        totalCnt.setTextColor(Color.RED);
+        totalCnt.setGravity(Gravity.LEFT);
         RelativeLayout.LayoutParams totalCntParams = new RelativeLayout.LayoutParams(
-                260, 40); // 设置按钮的宽度和高度
+                70, 30); // 设置按钮的宽度和高度
         totalCntParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3; // 纵坐标定位
-        totalCntParams.leftMargin = 160 + 10; // 横坐标定位
+        totalCntParams.leftMargin = 290; // 横坐标定位
         relativeLayout.addView(totalCnt, totalCntParams);
 
+        TextView tipLbl = new TextView(this);
+        tipLbl.setText("提示：");
+        RelativeLayout.LayoutParams tipLblParams = new RelativeLayout.LayoutParams(
+                70, 30); // 设置按钮的宽度和高度
+        tipLblParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 4 + 30; // 纵坐标定位
+        tipLblParams.leftMargin = 0; // 横坐标定位
+        relativeLayout.addView(tipLbl, tipLblParams);
         tip = new TextView(this);
         tip.setText("请移动按钮");
+        tip.setTextColor(0xFF7A378B);
+        tip.setGravity(Gravity.LEFT);
         RelativeLayout.LayoutParams tipParams = new RelativeLayout.LayoutParams(
-                460, 40); // 设置按钮的宽度和高度
-        tipParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 4 + 40; // 纵坐标定位
-        tipParams.leftMargin = 0; // 横坐标定位
+                screenWidth - 70, 30); // 设置按钮的宽度和高度
+        tipParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 4 + 30; // 纵坐标定位
+        tipParams.leftMargin = 70; // 横坐标定位
         relativeLayout.addView(tip, tipParams);
         
         setContentView(relativeLayout);
@@ -255,6 +279,30 @@ public class StartGameFace extends Activity
         // 按钮的ID是通过2000+10*横序号+纵序号(考虑到一横最多不会超过10个按钮,一纵也不会超过10个)
         calBtnArr[i][j].setId(getCalId(i, j));
         calBtnArr[i][j].setText(calArr[random.nextInt(calArr.length)]);
+        addMoveLister(calBtnArr[i][j]);
+
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.RECTANGLE); // 画框
+        drawable.setStroke(1, Color.YELLOW); // 边框粗细及颜色
+        drawable.setColor(0x44FF2200); // 边框内部颜色
+        calBtnArr[i][j].setBackground(drawable);
+        calBtnArr[i][j].setTextSize(12); // 设置按钮上字体大小
+
+        RelativeLayout.LayoutParams btParams = new RelativeLayout.LayoutParams(
+                btnWidth, btnHeight); // 设置按钮的宽度和高度
+        // i表示的是第i行 k表示的是第k列
+        btParams.leftMargin = btnHeight * j; // 纵坐标定位
+        btParams.topMargin = btnWidth * (i + numHeiNum) + splitHeight; // 横坐标定位
+        relativeLayout.addView(calBtnArr[i][j], btParams);
+    }
+    
+    private void addCalBtn2(int i, int j, Random random) {
+        calBtnArr[i][j] = new Button(this);
+        // 按钮的ID是通过2000+10*横序号+纵序号(考虑到一横最多不会超过10个按钮,一纵也不会超过10个)
+        calBtnArr[i][j].setId(getCalId(i, j));
+        int index = random.nextInt(calArr.length);
+        index = index == 0 ? 1 : index;
+        calBtnArr[i][j].setText(calArr[index]);
         addMoveLister(calBtnArr[i][j]);
 
         GradientDrawable drawable = new GradientDrawable();
@@ -335,12 +383,49 @@ public class StartGameFace extends Activity
      * @return void
      */
     private void validate() {
+        boolean isEndFlag = true;
+        for (int i = 0; i < calHeiNum; i++)
+        {
+            for (int j = 0; j < widNum; j++)
+            {
+                // 运算符区存在等号
+                if (null != calBtnArr[i][j] && calArr[0].equals(calBtnArr[i][j].getText())) {
+                    isEndFlag = false;
+                }
+            }
+        }
+        for (int i = 0; i < widNum; i++)
+        {
+            // 表达式区存在等号
+            if (null != expressBtnArr[i] && calArr[0].equals(expressBtnArr[i].getText())) {
+                isEndFlag = false;
+            }
+        }
+        if (isEndFlag) {
+            AlertDialog alert = new AlertDialog.Builder(this)
+                    .setTitle("提示")
+                    .setMessage("游戏结束，您的最高分是" + totalScore.getText())
+                    .setPositiveButton("确定",
+                            new DialogInterface.OnClickListener()
+                            {
+                                // 处理确定按钮点击事件
+                                @Override
+                                public void onClick(DialogInterface dialog,
+                                        int which)
+                                {
+                                    setContentView(R.layout.activity_main_face);
+                                    return;
+                                }
+                            }).create();
+            alert.show();
+        }
         if (leftBtn == 0)
         {
             // 倒数第二个运算符必须是=号
-            if (!"=".equals(expressBtnArr[widNum - 2].getText()))
+            if (!calArr[0].equals(expressBtnArr[widNum - 2].getText()))
             {
-                tip.setText("运算表达式格式错误，请继续移动按钮");
+                tip.setText("运算表达式格式错误，请继续移动按钮!");
+                tip.setTextColor(0xFFFF0000);
             }
             else
             {
@@ -357,14 +442,16 @@ public class StartGameFace extends Activity
                     if (Integer.parseInt(expressBtnArr[widNum - 1]
                             .getText().toString()) != Float.valueOf(result.toString()).intValue()) {
                         // 计算的结果不相等  
-                        tip.setText("运算表达式结果不相等，请继续移动按钮");
+                        tip.setText("运算表达式结果不相等，请继续移动按钮!");
+                        tip.setTextColor(0xFFFF0000);
                     } else {
                         // 计算结果相等
                         score += Float.valueOf(result.toString()).intValue();
                         succCnt += 1;
-                        totalScore.setText("总得分：" + score);
-                        totalCnt.setText("总成功次数:" + succCnt);
+                        totalScore.setText(String.valueOf(score));
+                        totalCnt.setText(String.valueOf(succCnt));
                         tip.setText("成功啦!");
+                        tip.setTextColor(0xFF7A378B);
                         
                         /**
                          * 1：清除掉运算表达式以及存放运算表达式对应的Button的数组
@@ -391,7 +478,7 @@ public class StartGameFace extends Activity
                             for (int j = 0; j < widNum; j++)
                             {
                                 if (null == calBtnArr[i][j]) {
-                                    addCalBtn(i, j, random);
+                                    addCalBtn2(i, j, random);
                                 }
                             }
                         }
@@ -401,7 +488,8 @@ public class StartGameFace extends Activity
                 }
                 catch (ExpressionException e)
                 {
-                	tip.setText("运算表达式格式非法，请继续移动按钮");
+                	tip.setText("运算表达式格式非法，请继续移动按钮！");
+                	tip.setTextColor(0xFFFF0000);
                 }
             }
         }
