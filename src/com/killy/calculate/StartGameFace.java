@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -122,6 +123,11 @@ public class StartGameFace extends Activity
     private static TextView totalCnt = null;
     
     /**
+     * 最高分
+     */
+    private static TextView highScore = null;
+    
+    /**
      * 提示信息 
      */
     private static TextView tip = null;
@@ -192,7 +198,7 @@ public class StartGameFace extends Activity
         totalScore.setTextColor(Color.RED);
         totalScore.setGravity(Gravity.LEFT);
         RelativeLayout.LayoutParams totalScoreParams = new RelativeLayout.LayoutParams(
-                70, 30); // 设置按钮的宽度和高度
+                60, 30); // 设置按钮的宽度和高度
         totalScoreParams.leftMargin = 90;// 横坐标定位
         totalScoreParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3;// 纵坐标定位
         relativeLayout.addView(totalScore, totalScoreParams);
@@ -202,18 +208,35 @@ public class StartGameFace extends Activity
         RelativeLayout.LayoutParams totalCntLblParams = new RelativeLayout.LayoutParams(
                 130, 30); // 设置按钮的宽度和高度
         totalCntLblParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3; // 纵坐标定位
-        totalCntLblParams.leftMargin = 160; // 横坐标定位
+        totalCntLblParams.leftMargin = 150; // 横坐标定位
         relativeLayout.addView(totalCntLbl, totalCntLblParams);
         totalCnt = new TextView(this);
         totalCnt.setText("0");
         totalCnt.setTextColor(Color.RED);
         totalCnt.setGravity(Gravity.LEFT);
         RelativeLayout.LayoutParams totalCntParams = new RelativeLayout.LayoutParams(
-                70, 30); // 设置按钮的宽度和高度
+                60, 30); // 设置按钮的宽度和高度
         totalCntParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3; // 纵坐标定位
-        totalCntParams.leftMargin = 290; // 横坐标定位
+        totalCntParams.leftMargin = 280; // 横坐标定位
         relativeLayout.addView(totalCnt, totalCntParams);
 
+        TextView highScoreLbl = new TextView(this);
+        highScoreLbl.setText("最高分：");
+        RelativeLayout.LayoutParams highScoreLblParams = new RelativeLayout.LayoutParams(
+                90, 30); // 设置按钮的宽度和高度
+        highScoreLblParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3; // 纵坐标定位
+        highScoreLblParams.leftMargin = 340; // 横坐标定位
+        relativeLayout.addView(highScoreLbl, highScoreLblParams);
+        highScore = new TextView(this);
+        highScore.setText(String.valueOf(MainFace.setHighScore(0)));
+        highScore.setTextColor(Color.RED);
+        highScore.setGravity(Gravity.LEFT);
+        RelativeLayout.LayoutParams highScoreParams = new RelativeLayout.LayoutParams(
+                60, 30); // 设置按钮的宽度和高度
+        highScoreParams.topMargin = btnHeight * (numHeiNum + calHeiNum + 1) + splitHeight * 3; // 纵坐标定位
+        highScoreParams.leftMargin = 430; // 横坐标定位
+        relativeLayout.addView(highScore, highScoreParams);
+        
         TextView tipLbl = new TextView(this);
         tipLbl.setText("提示：");
         RelativeLayout.LayoutParams tipLblParams = new RelativeLayout.LayoutParams(
@@ -296,30 +319,6 @@ public class StartGameFace extends Activity
         relativeLayout.addView(calBtnArr[i][j], btParams);
     }
     
-    private void addCalBtn2(int i, int j, Random random) {
-        calBtnArr[i][j] = new Button(this);
-        // 按钮的ID是通过2000+10*横序号+纵序号(考虑到一横最多不会超过10个按钮,一纵也不会超过10个)
-        calBtnArr[i][j].setId(getCalId(i, j));
-        int index = random.nextInt(calArr.length);
-        index = index == 0 ? 1 : index;
-        calBtnArr[i][j].setText(calArr[index]);
-        addMoveLister(calBtnArr[i][j]);
-
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setShape(GradientDrawable.RECTANGLE); // 画框
-        drawable.setStroke(1, Color.YELLOW); // 边框粗细及颜色
-        drawable.setColor(0x44FF2200); // 边框内部颜色
-        calBtnArr[i][j].setBackground(drawable);
-        calBtnArr[i][j].setTextSize(12); // 设置按钮上字体大小
-
-        RelativeLayout.LayoutParams btParams = new RelativeLayout.LayoutParams(
-                btnWidth, btnHeight); // 设置按钮的宽度和高度
-        // i表示的是第i行 k表示的是第k列
-        btParams.leftMargin = btnHeight * j; // 纵坐标定位
-        btParams.topMargin = btnWidth * (i + numHeiNum) + splitHeight; // 横坐标定位
-        relativeLayout.addView(calBtnArr[i][j], btParams);
-    }
-    
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -383,42 +382,6 @@ public class StartGameFace extends Activity
      * @return void
      */
     private void validate() {
-        boolean isEndFlag = true;
-        for (int i = 0; i < calHeiNum; i++)
-        {
-            for (int j = 0; j < widNum; j++)
-            {
-                // 运算符区存在等号
-                if (null != calBtnArr[i][j] && calArr[0].equals(calBtnArr[i][j].getText())) {
-                    isEndFlag = false;
-                }
-            }
-        }
-        for (int i = 0; i < widNum; i++)
-        {
-            // 表达式区存在等号
-            if (null != expressBtnArr[i] && calArr[0].equals(expressBtnArr[i].getText())) {
-                isEndFlag = false;
-            }
-        }
-        if (isEndFlag) {
-            AlertDialog alert = new AlertDialog.Builder(this)
-                    .setTitle("提示")
-                    .setMessage("游戏结束，您的最高分是" + totalScore.getText())
-                    .setPositiveButton("确定",
-                            new DialogInterface.OnClickListener()
-                            {
-                                // 处理确定按钮点击事件
-                                @Override
-                                public void onClick(DialogInterface dialog,
-                                        int which)
-                                {
-                                    setContentView(R.layout.activity_main_face);
-                                    return;
-                                }
-                            }).create();
-            alert.show();
-        }
         if (leftBtn == 0)
         {
             // 倒数第二个运算符必须是=号
@@ -450,6 +413,7 @@ public class StartGameFace extends Activity
                         succCnt += 1;
                         totalScore.setText(String.valueOf(score));
                         totalCnt.setText(String.valueOf(succCnt));
+                        highScore.setText(String.valueOf(MainFace.setHighScore(score)));
                         tip.setText("成功啦!");
                         tip.setTextColor(0xFF7A378B);
                         
@@ -478,12 +442,14 @@ public class StartGameFace extends Activity
                             for (int j = 0; j < widNum; j++)
                             {
                                 if (null == calBtnArr[i][j]) {
-                                    addCalBtn2(i, j, random);
+                                    addCalBtn(i, j, random);
                                 }
                             }
                         }
 
                         leftBtn = widNum;
+                        
+                        validateEnd();
                     }
                 }
                 catch (ExpressionException e)
@@ -492,6 +458,49 @@ public class StartGameFace extends Activity
                 	tip.setTextColor(0xFFFF0000);
                 }
             }
+        }
+    }
+    
+    /**
+     * 验证游戏是否结束
+     */
+    private void validateEnd() {
+        boolean isEndFlag = true;
+        for (int i = 0; i < calHeiNum; i++)
+        {
+            for (int j = 0; j < widNum; j++)
+            {
+                // 运算符区存在等号
+                if (null != calBtnArr[i][j] && calArr[0].equals(calBtnArr[i][j].getText())) {
+                    isEndFlag = false;
+                }
+            }
+        }
+        for (int i = 0; i < widNum; i++)
+        {
+            // 表达式区存在等号
+            if (null != expressBtnArr[i] && calArr[0].equals(expressBtnArr[i].getText())) {
+                isEndFlag = false;
+            }
+        }
+        if (isEndFlag) {
+            AlertDialog alert = new AlertDialog.Builder(this)
+                .setTitle("提示")
+                .setMessage("游戏结束，您的最高分是" + totalScore.getText())
+                .setPositiveButton("确定",
+                    new DialogInterface.OnClickListener()
+                    {
+                        // 处理确定按钮点击事件
+                        @Override
+                        public void onClick(DialogInterface dialog,
+                                int which)
+                        {
+                            Intent intent = new Intent(StartGameFace.this, MainFace.class);
+                            startActivity(intent);
+                            return;
+                        }
+                    }).create();
+            alert.show();
         }
     }
     

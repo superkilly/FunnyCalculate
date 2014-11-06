@@ -10,7 +10,21 @@ public class MainFace extends Activity {
     /**
      * 整个系统最高分
      */
-    public static int HIGH_SCORE = 0;
+    private static int HIGH_SCORE = 0;
+    
+    /**
+     * 设置最高分
+     * @param highScore
+     * 待设置的最高分
+     * @return int
+     * 返回设置之后的最高分
+     */
+    public static int setHighScore(int highScore) {
+        if (highScore > HIGH_SCORE) {
+            HIGH_SCORE = highScore;
+        }
+        return HIGH_SCORE;
+    }
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
