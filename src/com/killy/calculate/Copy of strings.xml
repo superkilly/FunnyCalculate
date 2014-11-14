@@ -1,0 +1,32 @@
+<resources>
+
+    <string name="app_name">FunnyCalculate</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main_face">Funny Calculate</string>
+    <string name="title_activity_start_game">Start Game</string>
+	<string name="determin">Determin</string>
+    
+	<string name="startGameBtn">Start Game</string>
+	<string name="typeSettingBtn">Game Type Setting</string>
+	<string name="languageSettingBtn">Language Setting</string>
+	<string name="judgeNeighborBtn">Judge Neighbor</string>
+	<string name="rankingCheckBtn">Ranking Check</string>
+	<string name="contactUsBtn">Contact Us</string>
+	
+	<!-- start:language settings -->
+	<string name="language_title">语言设置</string>
+	<string name="language_singlechinese">简体中文</string>
+	<string name="language_complexchinese">繁体中文</string>
+	<string name="language_english">英语</string>
+	<string name="language_french">法语</string>
+	<string name="language_german">德语</string>
+	<string name="language_stupid">土著语[艳艳专用，勿点]</string>
+	<!-- end  :language settings -->
+	
+	<!-- start:contact us properties -->
+	<string name="contact_producer">制作者：张荣华</string>
+	<string name="contact_email">邮箱：zhangronghua309@sina.com</string>
+	<string name="contact_address">地址：中国江苏</string>
+	<!-- end  :contact us properties -->
+</resources>

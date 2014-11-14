@@ -51,8 +51,7 @@ public class MainFace extends Activity {
     
     /**
      * set the properties of the game
-     * 方法描述：
-     *
+     * 设置游戏难度、类别等
      * @param view
      * @Exception 异常对象
      * @return void
@@ -63,8 +62,7 @@ public class MainFace extends Activity {
     
     /**
      * language Setting
-     * 方法描述：
-     *
+     * 设置游戏界面语言
      * @param view
      * @Exception 异常对象
      * @return void
@@ -75,8 +73,7 @@ public class MainFace extends Activity {
     
     /**
      * judge Neighbor
-     * 方法描述：
-     *
+     * 挑战你周边的玩家
      * @param view
      * @Exception 异常对象
      * @return void
@@ -87,8 +84,7 @@ public class MainFace extends Activity {
     
     /**
      * ranking Check
-     * 方法描述：
-     *
+     * 排名情况查询
      * @param view
      * @Exception 异常对象
      * @return void
@@ -99,13 +95,13 @@ public class MainFace extends Activity {
     
     /**
      * contact Us
-     * 方法描述：
-     *
+     * 联系信息
      * @param view
      * @Exception 异常对象
      * @return void
      */
     public void contactUsFun(View view) {
-        setContentView(R.layout.contact_us_face);
+        Intent intent = new Intent(MainFace.this, ContactUs.class);
+        startActivity(intent);
     }
 }

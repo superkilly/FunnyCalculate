@@ -23,6 +23,9 @@
         <activity 
             android:name=".StartGameFace"
             android:label="@string/title_activity_start_game"></activity>
+        <activity 
+            android:name=".ContactUs"
+            android:label="@string/title_activity_contact_us"></activity>
     </application>
 
 </manifest>

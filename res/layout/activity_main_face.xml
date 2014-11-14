@@ -9,12 +9,12 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="85dp"
         android:width="180dp"
         android:onClick="startGameFun"
         android:background="@drawable/button1"
         android:text="@string/startGameBtn" />
-	<Button
+	<!-- <Button
         android:id="@+id/typeSetting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -57,14 +57,14 @@
         android:width="180dp"
         android:onClick="rankingCheckFun"
         android:background="@drawable/button1"
-        android:text="@string/rankingCheckBtn" />
+        android:text="@string/rankingCheckBtn" /> -->
 	<Button
         android:id="@+id/contactUs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="345dp"
+        android:layout_marginTop="165dp"
         android:width="180dp"
         android:onClick="contactUsFun"
         android:background="@drawable/button2"
